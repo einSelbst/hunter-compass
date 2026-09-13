@@ -1,11 +1,16 @@
 # How often coordinates and compass needles update. 10 ticks = twice per second.
 update-interval-ticks: 10
 
+# Real 24-hour days. Server downtime and player disconnects do not pause the deadline.
+duration-real-days: 7
+
 # Enroll eligible players when an event starts or when they join later.
 auto-enroll-eligible-players: true
 
-# End the event when an enrolled hunter kills the target player.
-stop-on-hunter-kill: true
+boss-bar:
+  enabled: true
+  format: "<gold>Jagd auf <red><bold>{target}</bold></red> <dark_gray>•</dark_gray> <yellow>Tag {day}/{total-days}</yellow>"
+  color: "RED"
 
 compass:
   name: "<gold><bold>Hunter Compass</bold></gold>"
@@ -34,4 +39,5 @@ direction-labels:
 messages:
   prefix: "<gold>[HunterCompass]</gold> "
   victory: "<gold><bold>{hunter}</bold></gold> caught <red><bold>{target}</bold></red>!"
+  target-victory: "<green><bold>{target}</bold></green> survived {days} real days and won the hunt!"
   drop-blocked: "<red>The Hunter Compass cannot be dropped.</red>"

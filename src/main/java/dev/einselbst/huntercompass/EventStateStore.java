@@ -16,6 +16,8 @@ final class EventStateStore {
     private boolean active;
     private UUID targetId;
     private String targetName;
+    private long startedAtMillis;
+    private long deadlineMillis;
     private final Set<UUID> hunters = new LinkedHashSet<>();
 
     EventStateStore(JavaPlugin plugin) {
@@ -28,6 +30,8 @@ final class EventStateStore {
         active = data.getBoolean("event.active", false);
         targetName = data.getString("event.target-name");
         targetId = parseUuid(data.getString("event.target-uuid"));
+        startedAtMillis = data.getLong("event.started-at-epoch-millis", 0L);
+        deadlineMillis = data.getLong("event.deadline-epoch-millis", 0L);
         hunters.clear();
         for (String raw : data.getStringList("event.hunters")) {
             UUID id = parseUuid(raw);
@@ -35,17 +39,20 @@ final class EventStateStore {
                 hunters.add(id);
             }
         }
-        if (active && (targetId == null || targetName == null)) {
-            plugin.getLogger().warning("Saved event state has no valid target; disabling the event.");
+        if (active && (targetId == null || targetName == null || startedAtMillis <= 0L
+                || deadlineMillis <= startedAtMillis)) {
+            plugin.getLogger().warning("Saved event state is incomplete; disabling the event.");
             active = false;
             save();
         }
     }
 
-    void start(UUID id, String name) {
+    void start(UUID id, String name, long startedAtMillis, long deadlineMillis) {
         active = true;
         targetId = id;
         targetName = name;
+        this.startedAtMillis = startedAtMillis;
+        this.deadlineMillis = deadlineMillis;
         hunters.remove(id);
         save();
     }
@@ -54,6 +61,8 @@ final class EventStateStore {
         active = false;
         targetId = null;
         targetName = null;
+        startedAtMillis = 0L;
+        deadlineMillis = 0L;
         hunters.clear();
         save();
     }
@@ -96,6 +105,14 @@ final class EventStateStore {
         return targetName;
     }
 
+    long startedAtMillis() {
+        return startedAtMillis;
+    }
+
+    long deadlineMillis() {
+        return deadlineMillis;
+    }
+
     boolean isHunter(UUID id) {
         return hunters.contains(id);
     }
@@ -109,6 +126,8 @@ final class EventStateStore {
         data.set("event.active", active);
         data.set("event.target-uuid", targetId == null ? null : targetId.toString());
         data.set("event.target-name", targetName);
+        data.set("event.started-at-epoch-millis", startedAtMillis == 0L ? null : startedAtMillis);
+        data.set("event.deadline-epoch-millis", deadlineMillis == 0L ? null : deadlineMillis);
         data.set("event.hunters", hunters.stream().map(UUID::toString).toList());
         try {
             data.save(file);

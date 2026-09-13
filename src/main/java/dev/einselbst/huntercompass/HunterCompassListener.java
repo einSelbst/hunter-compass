@@ -32,6 +32,7 @@ final class HunterCompassListener implements Listener {
             return;
         }
         Player player = event.getPlayer();
+        plugin.showBossBar(player);
         if (player.getUniqueId().equals(state.targetId())) {
             items.removeAll(player);
             return;
@@ -110,14 +111,15 @@ final class HunterCompassListener implements Listener {
         if (!state.isActive() || !event.getPlayer().getUniqueId().equals(state.targetId())) {
             return;
         }
+        if (plugin.finishIfExpired()) {
+            return;
+        }
         Player killer = event.getPlayer().getKiller();
         if (killer == null || !state.isHunter(killer.getUniqueId())) {
             return;
         }
         plugin.announceVictory(killer, event.getPlayer());
-        if (plugin.getConfig().getBoolean("stop-on-hunter-kill", true)) {
-            plugin.getServer().getScheduler().runTask(plugin, plugin::stopEvent);
-        }
+        plugin.getServer().getScheduler().runTask(plugin, plugin::stopEvent);
     }
 
     private boolean isPlayerInventoryView(InventoryType type) {

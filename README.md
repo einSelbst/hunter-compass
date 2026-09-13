@@ -8,23 +8,27 @@
 
 **A dimension-aware tracking compass for Paper hunting events.**
 
-HunterCompass gives every hunter a personal compass and continuously shows the
-target player's exact block coordinates and dimension in the action bar. The
-target is never outlined, made visible through walls, or enrolled as a hunter.
-Everything runs on the server; players need no client mod or resource pack.
+HunterCompass runs a real-time, seven-day hunt. Every player sees the current
+day in a boss bar, while each hunter receives a personal compass and the target's
+exact block coordinates and dimension in the action bar. The target is never
+outlined, made visible through walls, or enrolled as a hunter. Everything runs
+on the server; players need no client mod or resource pack.
 
 ## Features
 
 - Exact X, Y, and Z block coordinates in a persistent, spam-free action bar
+- Persistent boss bar with the target name and current real-world event day
+- Configurable real-day deadline that continues through server downtime and player disconnects
 - Accurate compass direction while hunter and target share a dimension
 - Honest Overworld/Nether portal projection using Minecraft's 8:1 coordinate ratio
 - No invented direction for The End or unrelated custom dimensions
-- Persistent event target and hunter list across server restarts
+- Persistent event target, hunter list, start time, and deadline across server restarts
 - Automatic enrollment for eligible players who join during an active event
 - Owner-bound compasses marked with PersistentDataContainer data
 - Idempotent compass issuing: repeated commands remove extras instead of duplicating them
 - Configurable update rate, item text, action-bar text, dimension names, and behavior
-- Winner announcement and optional automatic stop when a hunter kills the target
+- Automatic hunter victory when an enrolled hunter kills the target
+- Automatic target victory when the real-time deadline expires
 - Admin commands with permissions and tab completion
 
 ## Requirements
@@ -51,14 +55,21 @@ Everything runs on the server; players need no client mod or resource pack.
    enrolled and receives one personal Hunter Compass.
 3. Players who join later are enrolled automatically by default. Use
    `/hc give <player>` or `/hc give all` whenever a compass needs to be restored.
-4. Check the current target and hunter count with `/hc status`.
+4. Check the current target, hunter count, and deadline with `/hc status`.
 5. When an enrolled hunter kills the target, HunterCompass announces the winner
-   and stops the event by default.
-6. Run `/hc stop` at any time to end the hunt and remove online players' Hunter Compasses.
+   and stops the event.
+6. If the target survives seven real 24-hour days, HunterCompass announces the
+   target as the winner and stops the event automatically.
+7. Run `/hc stop` at any time to end the hunt and remove online players' Hunter Compasses.
 
-Hunter records persist across restarts. If an enrolled player is offline when
-the event stops, any remaining marked compass is removed the next time another
-event enrolls that player; marked compasses never become valid for a different owner.
+The deadline is based on wall-clock time, not Minecraft's day/night cycle. Server
+downtime, player disconnects, sleeping, and `/time set` do not pause or change it.
+If the deadline passes while the server is stopped, the target wins when the
+server next starts. Event data persists across restarts.
+
+If an enrolled player is offline when the event stops, any remaining marked
+compass is removed the next time another event enrolls that player; marked
+compasses never become valid for a different owner.
 
 ## Dimension behavior
 
@@ -90,7 +101,7 @@ as the target direction.
 | --- | --- | --- |
 | `/hc start <target>` | Start a hunt and enroll eligible online players | `huntercompass.admin` |
 | `/hc stop` | Stop the hunt and remove online compasses | `huntercompass.admin` |
-| `/hc status` | Show the target, online state, and hunter count | `huntercompass.admin` |
+| `/hc status` | Show the target, online state, hunter count, and deadline | `huntercompass.admin` |
 | `/hc give <player\|all>` | Enroll players and ensure exactly one compass each | `huntercompass.admin` |
 | `/hc remove <player\|all>` | Remove hunters and their marked compasses | `huntercompass.admin` |
 | `/hc reload` | Reload `config.yml` and the update interval | `huntercompass.admin` |
@@ -111,8 +122,9 @@ The default configuration is stored in
 | Setting | Default | Description |
 | --- | ---: | --- |
 | `update-interval-ticks` | `10` | Coordinate and needle update interval |
+| `duration-real-days` | `7` | Event duration in real 24-hour days |
 | `auto-enroll-eligible-players` | `true` | Enroll permitted players on start and join |
-| `stop-on-hunter-kill` | `true` | Announce the winner and end the event |
+| `boss-bar.*` | See file | Boss bar visibility, MiniMessage format, and color |
 | `compass.prevent-dropping` | `true` | Prevent deliberate compass transfers |
 | `compass.prevent-container-storage` | `true` | Prevent storage that could create replacement copies |
 | `compass.name` / `compass.lore` | See file | MiniMessage item text |

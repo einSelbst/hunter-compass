@@ -10,6 +10,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -21,6 +24,9 @@ final class HunterCompassCommand implements CommandExecutor, TabCompleter {
     private final EventStateStore state;
     private final CompassItemService items;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final DateTimeFormatter deadlineFormatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm z")
+            .withZone(ZoneId.systemDefault());
 
     HunterCompassCommand(HunterCompassPlugin plugin, EventStateStore state, CompassItemService items) {
         this.plugin = plugin;
@@ -69,8 +75,7 @@ final class HunterCompassCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        plugin.stopEvent();
-        state.start(target.getUniqueId(), target.getName());
+        plugin.startEvent(target);
         int enrolled = 0;
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (player.getUniqueId().equals(target.getUniqueId())
@@ -82,7 +87,8 @@ final class HunterCompassCommand implements CommandExecutor, TabCompleter {
             enrolled++;
         }
         reply(sender, "<green>Hunt started.</green> Target: <gold>" + target.getName()
-                + "</gold>; hunters: <yellow>" + enrolled + "</yellow>.");
+                + "</gold>; hunters: <yellow>" + enrolled + "</yellow>; deadline: <aqua>"
+                + deadlineFormatter.format(Instant.ofEpochMilli(state.deadlineMillis())) + "</aqua>.");
         return true;
     }
 
@@ -104,7 +110,8 @@ final class HunterCompassCommand implements CommandExecutor, TabCompleter {
         boolean online = plugin.getServer().getPlayer(state.targetId()) != null;
         reply(sender, "<green>Active</green> target: <gold>" + state.targetName()
                 + "</gold> (" + (online ? "online" : "offline") + "), hunters: <yellow>"
-                + state.hunters().size() + "</yellow>.");
+                + state.hunters().size() + "</yellow>, deadline: <aqua>"
+                + deadlineFormatter.format(Instant.ofEpochMilli(state.deadlineMillis())) + "</aqua>.");
         return true;
     }
 
