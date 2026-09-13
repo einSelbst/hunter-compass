@@ -1,0 +1,37 @@
+# How often coordinates and compass needles update. 10 ticks = twice per second.
+update-interval-ticks: 10
+
+# Enroll eligible players when an event starts or when they join later.
+auto-enroll-eligible-players: true
+
+# End the event when an enrolled hunter kills the target player.
+stop-on-hunter-kill: true
+
+compass:
+  name: "<gold><bold>Hunter Compass</bold></gold>"
+  lore:
+    - "<gray>Tracks the current event target.</gray>"
+    - "<dark_gray>Coordinates stay visible in the action bar.</dark_gray>"
+  prevent-dropping: true
+  prevent-container-storage: true
+
+action-bar:
+  format: "<gold>{target}</gold> <dark_gray>|</dark_gray> <yellow>X {x}  Y {y}  Z {z}</yellow> <dark_gray>|</dark_gray> <aqua>{dimension}</aqua> <dark_gray>|</dark_gray> <white>{direction}</white>"
+  offline-format: "<gold>{target}</gold> <dark_gray>|</dark_gray> <red>{offline}</red>"
+
+dimensions:
+  overworld: "Overworld"
+  nether: "Nether"
+  end: "The End"
+  other: "Other"
+
+direction-labels:
+  exact: "exact direction"
+  portal: "scaled portal direction"
+  unavailable: "direction unavailable"
+  offline: "target offline"
+
+messages:
+  prefix: "<gold>[HunterCompass]</gold> "
+  victory: "<gold><bold>{hunter}</bold></gold> caught <red><bold>{target}</bold></red>!"
+  drop-blocked: "<red>The Hunter Compass cannot be dropped.</red>"

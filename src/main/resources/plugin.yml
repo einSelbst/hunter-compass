@@ -1,0 +1,20 @@
+name: HunterCompass
+version: '${version}'
+main: dev.einselbst.huntercompass.HunterCompassPlugin
+description: Fair, dimension-aware player tracking for Paper hunting events.
+author: einSelbst
+website: https://github.com/einSelbst/hunter-compass
+api-version: '1.21.11'
+commands:
+  huntercompass:
+    description: Manage the HunterCompass event.
+    usage: /huntercompass <start|stop|status|give|remove|reload>
+    aliases: [huntcompass, hc]
+    permission: huntercompass.admin
+permissions:
+  huntercompass.admin:
+    description: Start, stop, inspect, and configure HunterCompass events.
+    default: op
+  huntercompass.hunter:
+    description: Allow a player to be enrolled as a hunter.
+    default: true
